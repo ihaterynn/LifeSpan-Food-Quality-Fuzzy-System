@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuzzy Food Shelf Life Monitoring</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: url('{{ url_for('static', filename='LifeSpanBG.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            text-align: center;
+            font-size: 48px;
+            font-family: 'Poppins', sans-serif;
+            color: black;
+            text-shadow: 0 0 5px #72d875, 0 0 10px #72d875, 0 0 15px #72d875;
+        }
+        form {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        label {
+            margin-bottom: 5px;
+        }
+        input {
+            padding: 8px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .quality-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 80%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Fuzzy Food Shelf Life Quality Monitoring</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="temperature">Temperature (0-30 °C):</label>
+            <input type="number" step="0.1" name="temperature" required>
+        </div>
+        <div class="form-group">
+            <label for="humidity">Humidity (0-100%):</label>
+            <input type="number" step="0.1" name="humidity" required>
+        </div>
+        <div class="form-group">
+            <label for="food_type">Food Type (0 for Dry/Can, 1 for Fresh):</label>
+            <input type="number" step="1" name="food_type" required>
+        </div>
+        <div class="form-group">
+            <label for="time_on_shelf">Time on Shelf/Storage (0-30 days):</label>
+            <input type="number" step="0.1" name="time_on_shelf" required>
+        </div>
+
+        <button type="submit">Check Quality</button>
+    </form>
+
+    {% if error_message %}
+    <script>
+        alert("{{ error_message }}");
+    </script>
+    {% endif %}
+
+    {% if quality %}
+        <div class="result">
+            <h3 class="quality-text" style="
+                {% if quality_label == 'Excellent' or quality_label == 'Good' %}
+                    color: black;
+                    text-shadow: 0 0 5px #72d875, 0 0 10px #72d875, 0 0 15px #72d875;
+                {% elif quality_label == 'Fair' %}
+                    color: black;
+                    text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700;
+                {% elif quality_label == 'Poor' %}
+                    color: black;
+                    text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c, 0 0 15px #ff4c4c;
+                {% endif %}
+            ">
+                Food Quality: {{ quality }}% - {{ quality_label }}
+            </h3>
+            <img src="data:image/png;base64,{{ plot_img }}" alt="Membership Functions">
+        </div>
+    {% endif %}
+</body>
+</html>
