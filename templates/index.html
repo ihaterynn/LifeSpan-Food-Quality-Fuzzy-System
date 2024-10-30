@@ -6,14 +6,13 @@
     <title>Fuzzy Food Shelf Life Monitoring</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
-
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: url('{{ url_for('static', filename='LifeSpanBG.jpg') }}') no-repeat center center fixed;
             background-size: cover;
             margin: 0;
@@ -22,7 +21,6 @@
         h2 {
             text-align: center;
             font-size: 48px;
-            font-family: 'Poppins', sans-serif;
             color: black;
             text-shadow: 0 0 5px #72d875, 0 0 10px #72d875, 0 0 15px #72d875;
         }
@@ -32,7 +30,8 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 300px;
+            width: 90%;
+            max-width: 400px;
         }
         .form-group {
             display: flex;
@@ -64,17 +63,49 @@
         }
         .result {
             margin-top: 20px;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
         .quality-text {
             font-size: 24px;
             font-weight: bold;
+        }
+        .membership-graphs {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            max-width: 1040px;
+            width: 100%;
+        }
+        .membership-graphs img {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .membership-graphs img:hover {
+            transform: scale(1.05);
         }
         img {
             margin-top: 20px;
             max-width: 80%;
             height: auto;
             border-radius: 8px;
+        }
+        .quality-graph-container, .quality-3d-graph-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .error-message {
+            color: red;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -102,28 +133,41 @@
     </form>
 
     {% if error_message %}
-    <script>
-        alert("{{ error_message }}");
-    </script>
+        <div class="error-message">{{ error_message }}</div>
     {% endif %}
 
     {% if quality %}
         <div class="result">
-            <h3 class="quality-text" style="
-                {% if quality_label == 'Excellent' or quality_label == 'Good' %}
-                    color: black;
-                    text-shadow: 0 0 5px #72d875, 0 0 10px #72d875, 0 0 15px #72d875;
-                {% elif quality_label == 'Fair' %}
-                    color: black;
-                    text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700;
-                {% elif quality_label == 'Poor' %}
-                    color: black;
-                    text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c, 0 0 15px #ff4c4c;
-                {% endif %}
-            ">
-                Food Quality: {{ quality }}% - {{ quality_label }}
-            </h3>
-            <img src="data:image/png;base64,{{ plot_img }}" alt="Membership Functions">
+            <div class="quality-graph-container">
+                <h3 class="quality-text" style="
+                    {% if quality_label == 'Excellent' or quality_label == 'Good' %}
+                        color: black;
+                        text-shadow: 0 0 5px #72d875, 0 0 10px #72d875, 0 0 15px #72d875;
+                    {% elif quality_label == 'Fair' %}
+                        color: black;
+                        text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700;
+                    {% elif quality_label == 'Poor' %}
+                        color: black;
+                        text-shadow: 0 0 5px #ff4c4c, 0 0 10px #ff4c4c, 0 0 15px #ff4c4c;
+                    {% endif %}
+                ">
+                    Food Quality: {{ quality }}% - {{ quality_label }}
+                </h3>
+                <img src="data:image/png;base64,{{ plot_img }}" alt="Quality Output Graph">
+            </div>
+
+            {% if surface_plot_img %}
+                <div class="quality-3d-graph-container">
+                    <img src="data:image/png;base64,{{ surface_plot_img }}" alt="3D Surface Plot">
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="membership-graphs">
+            <img src="data:image/png;base64,{{ individual_plots.temperature }}" alt="Temperature Membership Function">
+            <img src="data:image/png;base64,{{ individual_plots.humidity }}" alt="Humidity Membership Function">
+            <img src="data:image/png;base64,{{ individual_plots.food_type }}" alt="Food Type Membership Function">
+            <img src="data:image/png;base64,{{ individual_plots.time_on_shelf }}" alt="Time on Shelf Membership Function">
         </div>
     {% endif %}
 </body>

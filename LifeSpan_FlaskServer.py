@@ -8,6 +8,8 @@ matplotlib.use('Agg')  # Set the backend to 'Agg' to avoid issues with non-main 
 import matplotlib.pyplot as plt
 import io
 import base64
+from mpl_toolkits.mplot3d import Axes3D
+
 
 app = Flask(__name__)
 
@@ -180,6 +182,87 @@ def plot_membership_functions(temperature, humidity, food_type, time_on_shelf, q
 
     return base64.b64encode(img.getvalue()).decode('utf8')
 
+def plot_individual_membership_functions(temperature, humidity, food_type, time_on_shelf):
+    # Dictionary to hold base64 images for each membership function plot
+    images = {}
+    
+    # Set the figure size to a larger size
+    figure_size = (10, 6)  # Increased size for better visibility
+
+    # Plot and store membership functions for each variable
+    for var_name, variable in zip(
+        ["temperature", "humidity", "food_type", "time_on_shelf"],
+        [temperature, humidity, food_type, time_on_shelf]
+    ):
+        plt.figure(figsize=figure_size)  # Set the figure size
+        for term, mf in variable.terms.items():
+            plt.plot(variable.universe, mf.mf, label=term)
+        plt.title(f"{var_name.capitalize()} Membership Functions")
+        plt.xlabel(var_name.capitalize())
+        plt.ylabel("Membership")
+        plt.legend(loc="upper right")
+        plt.tight_layout()
+
+        # Save the figure to a bytes buffer and encode to base64
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        images[var_name] = base64.b64encode(img.getvalue()).decode('utf8')
+        plt.close()
+
+    return images
+
+def plot_3d_surface(temperature, humidity, food_type, time_on_shelf):
+    print("Starting 3D surface plot computations...")
+
+    # First plot for Temperature vs. Humidity vs. Quality
+    temp_values = np.linspace(0, 30, 5)
+    hum_values = np.linspace(0, 100, 5)
+    quality_values_temp_hum = np.zeros((len(temp_values), len(hum_values)))
+
+    for i, temp in enumerate(temp_values):
+        for j, hum in enumerate(hum_values):
+            quality_values_temp_hum[i, j] = compute_food_quality(temp, hum, 0, 0)  # Use default values for food type and time on shelf
+
+    fig = plt.figure(figsize=(15, 7))
+
+    # First subplot
+    ax1 = fig.add_subplot(121, projection='3d')
+    X_temp, Y_hum = np.meshgrid(temp_values, hum_values)
+    surf1 = ax1.plot_surface(X_temp, Y_hum, quality_values_temp_hum.T, cmap='viridis', edgecolor='none')
+    ax1.set_title('3D Surface Plot of Food Quality (Temp vs Humidity)')
+    ax1.set_xlabel('Temperature (°C)')
+    ax1.set_ylabel('Humidity (%)')
+    ax1.set_zlabel('Food Quality (%)')
+    fig.colorbar(surf1, ax=ax1, shrink=0.5, aspect=5)
+
+    # Second plot for Food Type vs. Time on Shelf vs. Quality
+    type_values = np.array([0, 1])  # Food type values: 0 = Dry, 1 = Fresh
+    shelf_values = np.linspace(0, 30, 5)
+    quality_values_type_shelf = np.zeros((len(type_values), len(shelf_values)))
+
+    for i, f_type in enumerate(type_values):
+        for j, shelf in enumerate(shelf_values):
+            quality_values_type_shelf[i, j] = compute_food_quality(15, 50, f_type, shelf)  # Use typical values for temperature and humidity
+
+    # Second subplot
+    ax2 = fig.add_subplot(122, projection='3d')
+    X_type, Y_shelf = np.meshgrid(type_values, shelf_values)
+    surf2 = ax2.plot_surface(X_type, Y_shelf, quality_values_type_shelf.T, cmap='plasma', edgecolor='none')
+    ax2.set_title('3D Surface Plot of Food Quality (Food Type vs Time on Shelf)')
+    ax2.set_xlabel('Food Type (0=Dry, 1=Fresh)')
+    ax2.set_ylabel('Time on Shelf (days)')
+    ax2.set_zlabel('Food Quality (%)')
+    fig.colorbar(surf2, ax=ax2, shrink=0.5, aspect=5)
+
+    # Save the combined plot to a bytes buffer
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    return base64.b64encode(img.getvalue()).decode('utf8')
+
 
 def classify_quality(quality_value):
     if quality_value > 90:
@@ -217,11 +300,19 @@ def index():
                 quality_value = compute_food_quality(temperature_value, humidity_value, food_type_value, time_on_shelf_value)
                 quality_label = classify_quality(quality_value)
 
-                # Re-initialize system to plot membership functions
+                # Generate the main output plot
                 temperature, humidity, food_type, time_on_shelf, quality = initialize_system()
                 plot_img = plot_membership_functions(temperature, humidity, food_type, time_on_shelf, quality, quality_value)
 
-                return render_template("index.html", quality=quality_value, quality_label=quality_label, plot_img=plot_img)
+                # Generate individual membership function plots
+                individual_plots = plot_individual_membership_functions(temperature, humidity, food_type, time_on_shelf)
+
+                # Generate the 3D surface plot
+                surface_plot_img = plot_3d_surface(temperature, humidity, food_type, time_on_shelf)
+
+                return render_template("index.html", quality=quality_value, quality_label=quality_label,
+                                       plot_img=plot_img, individual_plots=individual_plots,
+                                       surface_plot_img=surface_plot_img)
 
         except ValueError:
             error_message = "Please enter valid numeric values for all fields."
@@ -229,5 +320,7 @@ def index():
     # Render the page with an error message if present
     return render_template("index.html", error_message=error_message)
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
+
