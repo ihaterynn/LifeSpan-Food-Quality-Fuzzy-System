@@ -110,7 +110,7 @@
     </style>
 </head>
 <body>
-    <h2>Fuzzy Food Shelf Life Quality Monitoring</h2>
+    <h2>Fuzzy Food Quality Monitoring System</h2>
     <form method="POST">
         <div class="form-group">
             <label for="temperature">Temperature (0-30 °C):</label>
@@ -153,7 +153,7 @@
                 ">
                     Food Quality: {{ quality }}% - {{ quality_label }}
                 </h3>
-                <img src="data:image/png;base64,{{ plot_img }}" alt="Quality Output Graph">
+                <img src="data:image/png;base64,{{ plot_img }}" alt="Food Quality Output Graph">
             </div>
 
             {% if surface_plot_img %}

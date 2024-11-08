@@ -164,7 +164,7 @@ def plot_membership_functions(temperature, humidity, food_type, time_on_shelf, q
 
     # Draw a vertical line to indicate the defuzzified output
     plt.axvline(x=quality_value, color='r', linestyle='--', linewidth=2, zorder=3)
-    plt.title(f"Quality Output - {quality_value:.2f}%")
+    plt.title(f"Food Quality Output - {quality_value:.2f}%")
     plt.legend(loc='best')
 
     # Set axis limits to make sure the graph is centered and occupies the available space
@@ -187,7 +187,7 @@ def plot_individual_membership_functions(temperature, humidity, food_type, time_
     images = {}
     
     # Set the figure size to a larger size
-    figure_size = (10, 6)  # Increased size for better visibility
+    figure_size = (10, 6)  
 
     # Plot and store membership functions for each variable
     for var_name, variable in zip(
@@ -222,7 +222,7 @@ def plot_3d_surface(temperature, humidity, food_type, time_on_shelf):
 
     for i, temp in enumerate(temp_values):
         for j, hum in enumerate(hum_values):
-            quality_values_temp_hum[i, j] = compute_food_quality(temp, hum, 0, 0)  # Use default values for food type and time on shelf
+            quality_values_temp_hum[i, j] = compute_food_quality(temp, hum, 0, 0)  
 
     fig = plt.figure(figsize=(15, 7))
 
@@ -237,13 +237,13 @@ def plot_3d_surface(temperature, humidity, food_type, time_on_shelf):
     fig.colorbar(surf1, ax=ax1, shrink=0.5, aspect=5)
 
     # Second plot for Food Type vs. Time on Shelf vs. Quality
-    type_values = np.array([0, 1])  # Food type values: 0 = Dry, 1 = Fresh
+    type_values = np.array([0, 1])  
     shelf_values = np.linspace(0, 30, 5)
     quality_values_type_shelf = np.zeros((len(type_values), len(shelf_values)))
 
     for i, f_type in enumerate(type_values):
         for j, shelf in enumerate(shelf_values):
-            quality_values_type_shelf[i, j] = compute_food_quality(15, 50, f_type, shelf)  # Use typical values for temperature and humidity
+            quality_values_type_shelf[i, j] = compute_food_quality(15, 50, f_type, shelf)  
 
     # Second subplot
     ax2 = fig.add_subplot(122, projection='3d')
